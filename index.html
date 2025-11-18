@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disposizione Classe</title>
+    
+    <!-- CSS CODE -->
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        #classroom {
+            display: grid;
+            grid-template-columns: 110px 1fr 110px;
+            grid-template-rows: auto 1fr auto;
+            width: 95%;
+            max-width: 1200px;
+            height: 80vh;
+            margin: auto;
+            background-color: #fffbe8;
+            border: 2px solid #333;
+            position: relative; 
+        }
+
+        .wall {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .top-wall {
+            grid-column: 1 / 4;
+            grid-row: 1;
+            padding: 15px;
+            gap: 10px;
+        }
+        
+        .left-wall, .right-wall {
+            grid-row: 2;
+            flex-direction: column;
+            justify-content: flex-start; 
+            gap: 15px;                   
+        }
+        
+        .left-wall {
+            grid-column: 1;
+            padding-top: 10px; /* Stays the same */
+        }
+
+        /* --- MODIFIED CSS --- */
+        .right-wall {
+            grid-column: 3;
+            padding-top: 0; /* Set to 0 to move desks as high as possible */
+        }
+        /* -------------------- */
+
+        .bottom-wall {
+            grid-column: 1 / 4;
+            grid-row: 3;
+        }
+
+        .center-area {
+            grid-column: 2;
+            grid-row: 2;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        #teacher-desk {
+            width: 100px;
+            height: 50px;
+            background-color: #a47449;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            border: 2px solid #6b4b2c;
+        }
+        
+        #door {
+            position: absolute;
+            bottom: 20px; 
+            left: 0;
+            height: 80px;
+            width: 10px;
+            background-color: #a47449;
+            border: 2px solid #6b4b2c;
+            border-left: none; 
+        }
+
+        .desk-pair {
+            display: flex;
+            gap: 4px;
+            padding: 4px;
+            background-color: #e0dcd1;
+            border-radius: 5px;
+        }
+
+        .left-wall .desk-pair,
+        .right-wall .desk-pair {
+            flex-direction: column;
+        }
+        
+        .student-station {
+            width: 50px;
+            height: 50px;
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 11px;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .student-station:hover {
+            background-color: #e0e8ff;
+            border-color: #007bff;
+        }
+
+        .student-name {
+            position: absolute;
+            bottom: 1px;
+            left: 0;
+            right: 0;
+            background-color: rgba(255, 255, 255, 0.75);
+            padding: 1px 0;
+            font-weight: bold;
+            font-size: 10px;
+        }
+
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); }
+        .modal-content { background-color: #fff; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 8px; display: flex; flex-direction: column; gap: 10px; }
+        .close-button { color: #aaa; align-self: flex-end; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close-button:hover, .close-button:focus { color: black; }
+        #save-button, #remove-button { padding: 10px; cursor: pointer; border: none; border-radius: 5px; color: white; }
+        #save-button { background-color: #28a745; }
+        #remove-button { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <div id="classroom">
+        <div class="wall top-wall">
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+        </div>
+        
+        <div class="wall left-wall">
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+        </div>
+        
+        <div class="center-area">
+             <div id="teacher-desk">Cattedra</div>
+        </div>
+        
+        <div class="wall right-wall">
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+            <div class="desk-pair"><div class="student-station"></div><div class="student-station"></div></div>
+        </div>
+        
+        <div class="wall bottom-wall">
+            <div id="door"></div>
+        </div>
+    </div>
+
+    <!-- Modal for student info (unchanged) -->
+    <div id="student-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Informazioni Studente</h2>
+            <input type="hidden" id="modal-station-id">
+            <label for="student-name">Nome:</label>
+            <input type="text" id="student-name" placeholder="Inserisci il nome...">
+            <label for="student-photo">Foto (.jpg, .png):</label>
+            <input type="file" id="student-photo" accept="image/jpeg, image/png">
+            <label for="student-info">Brevi informazioni:</label>
+            <textarea id="student-info" placeholder="Aggiungi note..."></textarea>
+            <button id="save-button">Salva</button>
+            <button id="remove-button">Rimuovi Studente</button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT CODE (unchanged) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const stations = document.querySelectorAll('.student-station');
+            const modal = document.getElementById('student-modal');
+            const closeButton = document.querySelector('.close-button');
+            const saveButton = document.getElementById('save-button');
+            const removeButton = document.getElementById('remove-button');
+            
+            const modalStationId = document.getElementById('modal-station-id');
+            const studentNameInput = document.getElementById('student-name');
+            const studentPhotoInput = document.getElementById('student-photo');
+            const studentInfoInput = document.getElementById('student-info');
+
+            let studentData = JSON.parse(localStorage.getItem('classroomData')) || {};
+
+            stations.forEach((station, index) => {
+                station.dataset.stationId = `station-${index}`;
+            });
+
+            function renderClassroom() {
+                stations.forEach(station => {
+                    const id = station.dataset.stationId;
+                    const data = studentData[id];
+                    station.innerHTML = '';
+                    station.style.backgroundImage = '';
+
+                    if (data && data.name) {
+                        if (data.photo) {
+                            station.style.backgroundImage = `url(${data.photo})`;
+                        }
+                        const nameDiv = document.createElement('div');
+                        nameDiv.className = 'student-name';
+                        nameDiv.textContent = data.name;
+                        station.appendChild(nameDiv);
+                    }
+                });
+            }
+
+            stations.forEach(station => {
+                station.addEventListener('click', () => {
+                    const id = station.dataset.stationId;
+                    modalStationId.value = id;
+                    const data = studentData[id] || {};
+                    studentNameInput.value = data.name || '';
+                    studentInfoInput.value = data.info || '';
+                    studentPhotoInput.value = '';
+                    modal.style.display = 'block';
+                });
+            });
+
+            closeButton.onclick = () => { modal.style.display = 'none'; };
+            window.onclick = (event) => { if (event.target == modal) { modal.style.display = 'none'; } };
+
+            saveButton.addEventListener('click', () => {
+                const id = modalStationId.value;
+                const name = studentNameInput.value.trim();
+                const photoFile = studentPhotoInput.files[0];
+
+                if (!name && !photoFile) {
+                    if (confirm('Vuoi rimuovere questo studente? I campi sono vuoti.')) {
+                        delete studentData[id];
+                        saveAndRender();
+                    }
+                    return;
+                }
+
+                const currentData = studentData[id] || {};
+                const newData = { name: name, info: studentInfoInput.value.trim(), photo: currentData.photo };
+
+                if (photoFile) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        newData.photo = e.target.result;
+                        studentData[id] = newData;
+                        saveAndRender();
+                    };
+                    reader.readAsDataURL(photoFile);
+                } else {
+                    studentData[id] = newData;
+                    saveAndRender();
+                }
+            });
+
+            removeButton.addEventListener('click', () => {
+                const id = modalStationId.value;
+                if (studentData[id]) {
+                    if (confirm('Sei sicuro di voler rimuovere questo studente?')) {
+                        delete studentData[id];
+                        saveAndRender();
+                    }
+                } else {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            function saveAndRender() {
+                localStorage.setItem('classroomData', JSON.stringify(studentData));
+                renderClassroom();
+                modal.style.display = 'none';
+            }
+
+            renderClassroom();
+        });
+    </script>
+
+</body>
+</html>
