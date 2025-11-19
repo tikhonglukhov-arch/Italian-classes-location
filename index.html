@@ -13,6 +13,11 @@
             margin: 0;
             padding: 20px;
         }
+        
+        /* Added to prevent text selection during drag */
+        body.dragging {
+            user-select: none;
+        }
 
         #classroom {
             display: grid;
@@ -49,15 +54,13 @@
         
         .left-wall {
             grid-column: 1;
-            padding-top: 10px; /* Stays the same */
+            padding-top: 10px;
         }
 
-        /* --- MODIFIED CSS --- */
         .right-wall {
             grid-column: 3;
-            padding-top: 0; /* Set to 0 to move desks as high as possible */
+            padding-top: 0;
         }
-        /* -------------------- */
 
         .bottom-wall {
             grid-column: 1 / 4;
@@ -123,12 +126,24 @@
             position: relative;
             background-size: cover;
             background-position: center;
+            transition: border-color 0.2s; /* Smooth transition for hover */
         }
 
         .student-station:hover {
-            background-color: #e0e8ff;
             border-color: #007bff;
         }
+
+        /* --- NEW CSS FOR DRAG-AND-DROP VISUALS --- */
+        .student-station.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .student-station.drag-over {
+            border-color: #28a745; /* Green border to indicate a drop target */
+            border-width: 2px;
+        }
+        /* ------------------------------------------- */
 
         .student-name {
             position: absolute;
@@ -202,7 +217,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT CODE (unchanged) -->
+    <!-- JAVASCRIPT CODE -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const stations = document.querySelectorAll('.student-station');
@@ -217,6 +232,11 @@
             const studentInfoInput = document.getElementById('student-info');
 
             let studentData = JSON.parse(localStorage.getItem('classroomData')) || {};
+            
+            // --- NEW: Variables for drag-and-drop state ---
+            let draggedStationId = null;
+            let isDragging = false;
+            // ----------------------------------------------
 
             stations.forEach((station, index) => {
                 station.dataset.stationId = `station-${index}`;
@@ -230,9 +250,7 @@
                     station.style.backgroundImage = '';
 
                     if (data && data.name) {
-                        if (data.photo) {
-                            station.style.backgroundImage = `url(${data.photo})`;
-                        }
+                        if (data.photo) station.style.backgroundImage = `url(${data.photo})`;
                         const nameDiv = document.createElement('div');
                         nameDiv.className = 'student-name';
                         nameDiv.textContent = data.name;
@@ -241,8 +259,11 @@
                 });
             }
 
+            // MODIFIED: Click is now split from drag
             stations.forEach(station => {
                 station.addEventListener('click', () => {
+                    if (isDragging) return; // Don't open modal if a drag just happened
+                    
                     const id = station.dataset.stationId;
                     modalStationId.value = id;
                     const data = studentData[id] || {};
@@ -251,6 +272,64 @@
                     studentPhotoInput.value = '';
                     modal.style.display = 'block';
                 });
+
+                // --- NEW: DRAG-AND-DROP EVENT LISTENERS ---
+                
+                // 1. Start dragging
+                station.addEventListener('mousedown', (e) => {
+                    draggedStationId = station.dataset.stationId;
+                    isDragging = false; // Reset on new mousedown
+                    e.preventDefault(); // Prevent default browser drag behavior
+                });
+
+                // 2. When dragging over another station
+                station.addEventListener('mouseover', () => {
+                    if (draggedStationId) {
+                        isDragging = true; // Confirmed drag, not a click
+                        document.body.classList.add('dragging');
+                        document.querySelector(`[data-station-id="${draggedStationId}"]`).classList.add('dragging');
+                        
+                        if (station.dataset.stationId !== draggedStationId) {
+                            station.classList.add('drag-over');
+                        }
+                    }
+                });
+
+                // 3. When mouse leaves a station
+                station.addEventListener('mouseout', () => {
+                    station.classList.remove('drag-over');
+                });
+                
+                // 4. Drop (swap)
+                station.addEventListener('mouseup', () => {
+                    if (draggedStationId && isDragging && station.dataset.stationId !== draggedStationId) {
+                        const targetStationId = station.dataset.stationId;
+
+                        // Swap data in our studentData object
+                        const sourceData = studentData[draggedStationId];
+                        const targetData = studentData[targetStationId];
+                        
+                        studentData[draggedStationId] = targetData;
+                        studentData[targetStationId] = sourceData;
+
+                        saveAndRender(); // Save and update the view
+                    }
+                });
+                // ------------------------------------------
+            });
+            
+            // NEW: Global mouseup to cancel dragging state
+            window.addEventListener('mouseup', () => {
+                if (draggedStationId) {
+                    document.body.classList.remove('dragging');
+                    document.querySelectorAll('.student-station').forEach(s => {
+                        s.classList.remove('dragging');
+                        s.classList.remove('drag-over');
+                    });
+                    draggedStationId = null;
+                    // Use a short timeout to reset isDragging, to prevent click from firing
+                    setTimeout(() => { isDragging = false; }, 50);
+                }
             });
 
             closeButton.onclick = () => { modal.style.display = 'none'; };
@@ -260,7 +339,6 @@
                 const id = modalStationId.value;
                 const name = studentNameInput.value.trim();
                 const photoFile = studentPhotoInput.files[0];
-
                 if (!name && !photoFile) {
                     if (confirm('Vuoi rimuovere questo studente? I campi sono vuoti.')) {
                         delete studentData[id];
@@ -268,10 +346,8 @@
                     }
                     return;
                 }
-
                 const currentData = studentData[id] || {};
                 const newData = { name: name, info: studentInfoInput.value.trim(), photo: currentData.photo };
-
                 if (photoFile) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
