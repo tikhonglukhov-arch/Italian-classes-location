@@ -36,7 +36,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            z-index: 1001; /* Above all other elements */
+            z-index: 1001;
         }
 
         /* --- Modals --- */
@@ -69,34 +69,40 @@
         .input-group input[type="number"] { width: 60px; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; }
         #row-inputs-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; border-left: 3px solid var(--accent-color); padding-left: 15px; }
 
+        /* --- DYNAMIC SIZING LOGIC --- */
         /* Classroom Container & Desk Styles */
         #classroom-container-parent { background-color: var(--secondary-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; }
         #classroom { 
-            display: grid; grid-template-columns: 110px 1fr 110px; grid-template-rows: auto 1fr auto;
+            display: grid; grid-template-columns: 1fr 4fr 1fr; /* Flexible columns */ grid-template-rows: auto 1fr auto;
             width: 100%; max-width: 1200px; min-height: 70vh; margin: auto; background-color: #fffbe8;
             border: 2px solid #333; position: relative;
         }
         .wall { display: flex; justify-content: center; align-items: center; }
-        .top-wall { grid-column: 1 / 4; grid-row: 1; padding: 15px; gap: 10px; flex-wrap: wrap; }
-        .left-wall, .right-wall { grid-row: 2; flex-direction: column; justify-content: flex-start; gap: 15px; }
-        .left-wall { grid-column: 1; padding-top: 10px; }
-        .right-wall { grid-column: 3; padding-top: 0; }
+        .top-wall { grid-column: 1 / 4; grid-row: 1; padding: 10px; gap: 10px; }
+        .left-wall, .right-wall { grid-row: 2; flex-direction: column; justify-content: flex-start; gap: 10px; padding: 10px 0; }
+        .left-wall { grid-column: 1; }
+        .right-wall { grid-column: 3; }
         .bottom-wall { grid-column: 1 / 4; grid-row: 3; }
         .center-area { grid-column: 2; grid-row: 2; display: flex; justify-content: center; align-items: flex-end; }
-        #teacher-desk { width: 100px; height: 50px; background-color: #a47449; color: white; display: flex; justify-content: center; align-items: center; border-radius: 5px; border: 2px solid #6b4b2c; }
+        #teacher-desk { width: 100px; height: 50px; background-color: #a47449; color: white; display: flex; justify-content: center; align-items: center; border-radius: 5px; border: 2px solid #6b4b2c; flex-shrink: 0; }
         
-        #standard-layout-area { display: flex; flex-direction: column; gap: 20px; align-items: center; padding: 20px; background-color: #fffbe8; min-height: 70vh; border: 2px solid #333; border-radius: 12px; }
-        .desk-row { display: flex; justify-content: center; gap: 15px; }
+        #standard-layout-area { display: flex; flex-direction: column; gap: 15px; align-items: center; padding: 20px; background-color: #fffbe8; min-height: 70vh; border: 2px solid #333; border-radius: 12px; }
+        .desk-row { display: flex; justify-content: center; gap: 10px; width: 100%; }
         
-        .desk-pair { display: flex; gap: 4px; padding: 4px; background-color: #e0dcd1; border-radius: 5px; }
-        .left-wall .desk-pair, .right-wall .desk-pair { flex-direction: column; }
+        .desk-pair { display: flex; gap: 4px; padding: 4px; background-color: #e0dcd1; border-radius: 5px; flex: 1; min-width: 0; }
+        .left-wall .desk-pair, .right-wall .desk-pair { flex-direction: column; width: 100%; flex: 0 1 auto; }
         
         .student-station {
-            width: 50px; height: 50px; /* Original size */ background-color: var(--desk-bg); border: 1px solid var(--border-color); cursor: pointer;
+            flex: 1; /* Allow shrinking/growing */
+            aspect-ratio: 1 / 1; /* Maintain square shape */
+            max-width: 50px; /* Restored original size as MAX size */
+            max-height: 50px;
+            min-width: 20px; /* Prevent from becoming invisible */
+            background-color: var(--desk-bg); border: 1px solid var(--border-color); cursor: pointer;
             display: flex; justify-content: center; align-items: center; text-align: center;
             overflow: hidden; position: relative; background-size: cover; background-position: center; transition: border-color 0.2s;
         }
-        .student-name { position: absolute; bottom: 1px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.75); padding: 1px 0; font-weight: bold; font-size: 10px; }
+        .student-name { position: absolute; bottom: 1px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.75); padding: 1px 0; font-weight: bold; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .student-station.drag-over { border-color: var(--success-color); border-width: 2px; }
         
         .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
@@ -150,8 +156,8 @@
                 <div class="config-buttons"><button class="change-layout-btn btn btn-primary"></button></div>
             </div>
             <div class="input-group">
-                <div><label data-translate="topWall"></label><input type="number" id="wall1-desks" value="7" min="0" max="7"></div>
-                <div><label data-translate="leftWall"></label><input type="number" id="wall2-desks" value="3" min="0" max="4"></div>
+                <div><label data-translate="topWall"></label><input type="number" id="wall1-desks" value="7" min="0" max="10"></div>
+                <div><label data-translate="leftWall"></label><input type="number" id="wall2-desks" value="4" min="0" max="4"></div>
                 <div><label data-translate="rightWall"></label><input type="number" id="wall3-desks" value="4" min="0" max="4"></div>
             </div>
             <button class="clear-data-btn btn btn-danger" data-translate="clearData"></button>
@@ -161,7 +167,7 @@
                 <h3 data-translate="standardConfig"></h3>
                 <div class="config-buttons"><button class="change-layout-btn btn btn-primary"></button></div>
             </div>
-            <div class="input-group"><label data-translate="totalRows"></label><input type="number" id="total-rows" value="3" min="1" max="5"></div>
+            <div class="input-group"><label data-translate="totalRows"></label><input type="number" id="total-rows" value="4" min="1" max="5"></div>
             <div id="row-inputs-container"></div>
             <button class="clear-data-btn btn btn-danger" data-translate="clearData"></button>
         </div>
@@ -296,8 +302,7 @@
                 currentLang = lang;
                 localStorage.setItem('classroomLang', lang);
                 translateUI();
-
-                if (appData.layoutType) { // If changing language mid-session
+                if (appData.layoutType) {
                     generateLayout(appData.layoutType, false);
                 }
             }
@@ -436,7 +441,7 @@
                 rowInputsContainer.innerHTML = '';
                 for (let i = 1; i <= rowCount; i++) {
                     const div = document.createElement('div');
-                    div.innerHTML = `<label>${translations[currentLang].desksInRow} ${i}:</label><input type="number" class="row-desk-input" value="5" min="0" max="5">`;
+                    div.innerHTML = `<label>${translations[currentLang].desksInRow} ${i}:</label><input type="number" class="row-desk-input" value="7" min="0" max="7">`;
                     rowInputsContainer.appendChild(div);
                 }
                 document.querySelectorAll('.row-desk-input').forEach(input => input.addEventListener('input', () => generateLayout('standard', false)));
