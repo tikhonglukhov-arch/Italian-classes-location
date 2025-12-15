@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Integrated Classroom Tool</title>
+    <title>Classroom Layout Tool / Strumento di Disposizione Classe</title>
 
     <!-- CSS STYLES -->
     <style>
@@ -15,6 +15,7 @@
             --accent-color: #007bff;
             --desk-bg: #eef2f9;
             --danger-color: #dc3545;
+            --success-color: #28a745;
         }
 
         /* --- General Setup --- */
@@ -30,12 +31,20 @@
             user-select: none;
         }
 
-        /* --- Modals (Selection, Student) --- */
+        /* --- Global Language Button --- */
+        #global-lang-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001; /* Above all other elements */
+        }
+
+        /* --- Modals --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.6);
             display: flex; justify-content: center; align-items: center;
-            z-index: 1000;
+            z-index: 1000; transition: opacity 0.3s;
         }
         .modal-content {
             background-color: var(--secondary-bg); padding: 40px; border-radius: 12px;
@@ -43,31 +52,36 @@
             max-width: 90%; width: 500px; position: relative;
         }
         #student-modal .modal-content { text-align: left; width: 400px; }
+        #description-modal p { text-align: left; line-height: 1.6; }
+        .choice-group { display: flex; gap: 20px; margin-top: 20px; justify-content: center; }
+        .close-button { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa; }
         
-        .layout-choice { display: flex; gap: 20px; margin-top: 20px; justify-content: center; }
-        .close-button {
-            position: absolute; top: 10px; right: 15px; font-size: 28px;
-            font-weight: bold; cursor: pointer; color: #aaa;
+        /* --- Student Modal Photo Display --- */
+        #student-photo-display {
+            width: 80px; height: 80px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-size: cover;
+            background-position: center;
+            margin-right: 10px;
         }
-        
+        #photo-controls { display: flex; align-items: center; }
+
         /* --- Main App Structure --- */
-        .app-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1400px; margin: auto; }
+        .app-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1400px; margin: auto; padding-top: 50px; }
         
         /* Configuration Panels */
         .config-panel { background-color: var(--secondary-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
-        .config-panel h3 { margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .config-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px; gap: 10px; }
+        .config-header h3 { margin: 0; }
+        .config-buttons { display: flex; gap: 10px; }
         .input-group { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; align-items: center; }
         .input-group label { font-weight: 500; }
         .input-group input[type="number"] { width: 60px; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; }
         #row-inputs-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; border-left: 3px solid var(--accent-color); padding-left: 15px; }
 
-        /* Classroom Container & Desk Styles from Project 1 */
-        #classroom-container-parent {
-            background-color: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 12px;
-        }
+        /* Classroom Container & Desk Styles */
+        #classroom-container-parent { background-color: var(--secondary-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; }
         #classroom { 
             display: grid; grid-template-columns: 110px 1fr 110px; grid-template-rows: auto 1fr auto;
             width: 100%; max-width: 1200px; min-height: 70vh; margin: auto; background-color: #fffbe8;
@@ -82,8 +96,7 @@
         .center-area { grid-column: 2; grid-row: 2; display: flex; justify-content: center; align-items: flex-end; }
         #teacher-desk { width: 100px; height: 50px; background-color: #a47449; color: white; display: flex; justify-content: center; align-items: center; border-radius: 5px; border: 2px solid #6b4b2c; }
         
-        /* Standard Layout Container */
-        #standard-layout-area { display: flex; flex-direction: column; gap: 20px; align-items: center; padding: 20px; background-color: #fffbe8; min-height: 70vh; border: 2px solid #333; border-radius: 12px; }
+        #standard-layout-area { display: flex; flex-direction: column; gap: 15px; align-items: center; padding: 20px; background-color: #fffbe8; min-height: 70vh; border: 2px solid #333; border-radius: 12px; }
         .desk-row { display: flex; justify-content: center; gap: 15px; }
         
         .desk-pair { display: flex; gap: 4px; padding: 4px; background-color: #e0dcd1; border-radius: 5px; }
@@ -92,16 +105,15 @@
         .student-station {
             width: 50px; height: 50px; background-color: var(--desk-bg); border: 1px solid var(--border-color); cursor: pointer;
             display: flex; justify-content: center; align-items: center; text-align: center;
-            overflow: hidden; position: relative; background-size: cover; background-position: center;
-            transition: border-color 0.2s;
+            overflow: hidden; position: relative; background-size: cover; background-position: center; transition: border-color 0.2s;
         }
-        .student-name { position: absolute; bottom: 1px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.75); padding: 1px 0; font-weight: bold; font-size: 10px; }
-        .student-station.drag-over { border-color: #28a745; border-width: 2px; }
+        .student-name { position: absolute; bottom: 1px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.75); padding: 1px 0; font-weight: bold; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .student-station.drag-over { border-color: var(--success-color); border-width: 2px; }
         
-        /* Utility */
-        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
         .btn-primary { background-color: var(--accent-color); color: white; }
         .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-secondary { background-color: #6c757d; color: white; }
         .hidden { display: none !important; }
 
         @media (max-width: 768px) {
@@ -109,62 +121,85 @@
             #classroom { display: flex; flex-direction: column; height: auto; min-height: 80vh; gap: 20px; }
             .wall { flex-wrap: wrap; }
             .left-wall .desk-pair, .right-wall .desk-pair { flex-direction: row; }
+            .config-header { flex-direction: column; align-items: flex-start; }
+            #global-lang-btn { top: 10px; right: 10px; }
         }
     </style>
 </head>
 <body>
+    <!-- Global Language Button -->
+    <button id="global-lang-btn" class="btn btn-secondary hidden"></button>
 
-    <!-- 1. Initial Classroom Type Selection Screen -->
-    <div id="selection-modal" class="modal">
+    <!-- 1. Start Notice / Welcome Message -->
+    <div id="description-modal" class="modal">
         <div class="modal-content">
-            <h2>Choose a Classroom Layout</h2>
-            <div class="layout-choice">
-                <button id="select-parliament" class="btn btn-primary">Parliament</button>
-                <button id="select-standard" class="btn btn-primary">Standard</button>
+            <h2 data-translate="welcomeTitle"></h2>
+            <p data-translate="welcomeDesc"></p>
+            <div class="choice-group">
+                <button id="welcome-lang-btn" class="btn btn-secondary"></button>
+                <button id="start-app-btn" class="btn btn-primary" data-translate="startBtn"></button>
             </div>
         </div>
     </div>
 
-    <!-- Main App Container (Initially Hidden) -->
-    <main class="app-container hidden" id="main-app">
-        <!-- Configuration Panels -->
-        <div class="config-panel hidden" id="parliament-config">
-            <h3>Parliament Layout Configuration</h3>
-            <div class="input-group">
-                <div><label>Top Wall (Pairs):</label><input type="number" id="wall1-desks" value="7" min="0"></div>
-                <div><label>Left Wall (Pairs):</label><input type="number" id="wall2-desks" value="3" min="0"></div>
-                <div><label>Right Wall (Pairs):</label><input type="number" id="wall3-desks" value="4" min="0"></div>
+    <!-- 2. Classroom Type Selection Screen -->
+    <div id="selection-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 data-translate="chooseLayout"></h2>
+            <div class="choice-group">
+                <button id="select-parliament" class="btn btn-primary" data-translate="parliament"></button>
+                <button id="select-standard" class="btn btn-primary" data-translate="standard"></button>
             </div>
-            <button id="reset-data-btn1" class="btn btn-danger">Reset All Data</button>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <main class="app-container hidden" id="main-app">
+        <div class="config-panel hidden" id="parliament-config">
+            <div class="config-header">
+                <h3 data-translate="parliamentConfig"></h3>
+                <div class="config-buttons"><button class="change-layout-btn btn btn-primary"></button></div>
+            </div>
+            <div class="input-group">
+                <div><label data-translate="topWall"></label><input type="number" id="wall1-desks" value="7" min="0" max="9"></div>
+                <div><label data-translate="leftWall"></label><input type="number" id="wall2-desks" value="4" min="0" max="4"></div>
+                <div><label data-translate="rightWall"></label><input type="number" id="wall3-desks" value="4" min="0" max="4"></div>
+            </div>
+            <button class="clear-data-btn btn btn-danger" data-translate="clearData"></button>
         </div>
         <div class="config-panel hidden" id="standard-config">
-            <h3>Standard Layout Configuration</h3>
-            <div class="input-group"><label>Total rows:</label><input type="number" id="total-rows" value="3" min="1"></div>
+            <div class="config-header">
+                <h3 data-translate="standardConfig"></h3>
+                <div class="config-buttons"><button class="change-layout-btn btn btn-primary"></button></div>
+            </div>
+            <div class="input-group"><label data-translate="totalRows"></label><input type="number" id="total-rows" value="3" min="1" max="8"></div>
             <div id="row-inputs-container"></div>
-            <button id="reset-data-btn2" class="btn btn-danger">Reset All Data</button>
+            <button class="clear-data-btn btn btn-danger" data-translate="clearData"></button>
         </div>
 
-        <!-- Classroom Rendering Area -->
-        <div id="classroom-container-parent">
-            <div id="classroom-container">
-                <!-- This will be dynamically filled -->
-            </div>
-        </div>
+        <div id="classroom-container-parent"><div id="classroom-container"></div></div>
     </main>
 
-    <!-- Student Info Modal (from Project 1) -->
+    <!-- Student Info Modal -->
     <div id="student-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <h3>Student Information</h3>
+            <h3 data-translate="studentInfo"></h3>
             <form id="student-form" style="display: flex; flex-direction: column; gap: 15px;">
                 <input type="hidden" id="station-id-input">
-                <div><label for="student-name">Name:</label><input type="text" id="student-name"></div>
-                <div><label for="student-photo">Photo:</label><input type="file" id="student-photo" accept="image/*"></div>
-                <div><label for="student-info">Notes:</label><textarea id="student-info" rows="3"></textarea></div>
+                <div><label data-translate="name"></label><input type="text" id="student-name"></div>
+                <div id="photo-container">
+                    <label data-translate="photo"></label>
+                    <div id="photo-controls">
+                        <div id="student-photo-display"></div>
+                        <button type="button" id="change-photo-btn" class="btn btn-secondary hidden" data-translate="changePhoto"></button>
+                    </div>
+                    <input type="file" id="student-photo" accept="image/*">
+                </div>
+                <div><label data-translate="notes"></label><textarea id="student-info" rows="3"></textarea></div>
                 <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                    <button type="button" id="remove-student-btn" class="btn btn-danger">Remove Student</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" id="remove-student-btn" class="btn btn-danger" data-translate="removeStudent"></button>
+                    <button type="submit" class="btn btn-primary" data-translate="save"></button>
                 </div>
             </form>
         </div>
@@ -173,325 +208,407 @@
     <!-- JAVASCRIPT LOGIC -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- TRANSLATION DATA ---
+            const translations = {
+                en: {
+                    welcomeTitle: "Welcome to the Classroom Layout Tool!",
+                    welcomeDesc: "This tool helps you design and manage your classroom seating. <strong>How to use:</strong><br>1. Choose a layout (Parliament or Standard).<br>2. Set the number of desks.<br>3. Click any desk to add a student's name, photo, and notes.<br>4. Drag one student onto another to swap their seats. Your progress is saved automatically!",
+                    startBtn: "Get Started",
+                    chooseLayout: "Choose a Classroom Schema",
+                    parliament: "Parliament",
+                    standard: "Standard",
+                    parliamentConfig: "Parliament Arrangement Configuration",
+                    standardConfig: "Standard Arrangement Configuration",
+                    changeLang: "Italiano",
+                    changeLayoutToStandard: "Switch to Standard",
+                    changeLayoutToParliament: "Switch to Parliament",
+                    topWall: "Top Row (Pairs):",
+                    leftWall: "Left Row (Pairs):",
+                    rightWall: "Right Row (Pairs):",
+                    totalRows: "Total Rows:",
+                    desksInRow: "Desks (Pairs) in Row",
+                    clearData: "Clear Student Data",
+                    studentInfo: "Student Information",
+                    name: "Name:",
+                    photo: "Photo:",
+                    notes: "Notes:",
+                    removeStudent: "Remove Student",
+                    save: "Save",
+                    teacherDesk: "Teacher's Desk",
+                    emptySeat: "Empty Seat",
+                    clearConfirm: "Are you sure you want to clear all student data from the board? The desk arrangement will remain.",
+                    changePhoto: "Change",
+                },
+                it: {
+                    welcomeTitle: "Benvenuto nello Strumento di Disposizione Classe!",
+                    welcomeDesc: "Questo strumento ti aiuta a progettare e gestire la disposizione dei banchi. <strong>Come usarlo:</strong><br>1. Scegli una disposizione (Parlamento o Standard).<br>2. Imposta il numero di banchi.<br>3. Clicca su un banco per aggiungere nome, foto e note di uno studente.<br>4. Trascina uno studente su un altro per scambiare i posti. I tuoi progressi sono salvati!",
+                    startBtn: "Inizia",
+                    chooseLayout: "Scegli uno Schema per la Classe",
+                    parliament: "Parlamento",
+                    standard: "Standard",
+                    parliamentConfig: "Configurazione Disposizione a Parlamento",
+                    standardConfig: "Configurazione Disposizione Standard",
+                    changeLang: "English",
+                    changeLayoutToStandard: "Passa a Standard",
+                    changeLayoutToParliament: "Passa a Parlamento",
+                    topWall: "Fila Superiore (Banchi):",
+                    leftWall: "Fila Sinistra (Banchi):",
+                    rightWall: "Fila Destra (Banchi):",
+                    totalRows: "Numero di File:",
+                    desksInRow: "Banchi nella Fila",
+                    clearData: "Cancella Dati Studenti",
+                    studentInfo: "Informazioni Studente",
+                    name: "Nome:",
+                    photo: "Foto:",
+                    notes: "Note:",
+                    removeStudent: "Rimuovi Studente",
+                    save: "Salva",
+                    teacherDesk: "Cattedra",
+                    emptySeat: "Posto Vuoto",
+                    clearConfirm: "Sei sicuro di voler cancellare i dati di tutti gli studenti? La disposizione dei banchi rimarrà invariata.",
+                    changePhoto: "Cambia",
+                }
+            };
+
             // --- DOM Element References ---
-            const mainApp = document.getElementById('main-app');
+            const globalLangBtn = document.getElementById('global-lang-btn');
+            const welcomeLangBtn = document.getElementById('welcome-lang-btn');
+            const descriptionModal = document.getElementById('description-modal');
             const selectionModal = document.getElementById('selection-modal');
+            const mainApp = document.getElementById('main-app');
             const classroomContainer = document.getElementById('classroom-container');
             const studentModal = document.getElementById('student-modal');
-            
-            // Config Panels & Inputs
             const parliamentConfigPanel = document.getElementById('parliament-config');
             const standardConfigPanel = document.getElementById('standard-config');
             const wallInputs = [document.getElementById('wall1-desks'), document.getElementById('wall2-desks'), document.getElementById('wall3-desks')];
             const totalRowsInput = document.getElementById('total-rows');
             const rowInputsContainer = document.getElementById('row-inputs-container');
+            const photoDisplay = document.getElementById('student-photo-display');
+            const photoInput = document.getElementById('student-photo');
+            const changePhotoBtn = document.getElementById('change-photo-btn');
             
             // --- State Management ---
-            let classroomData = {}; // Holds all data: layoutType, config, studentData
+            let appData = {};
+            let currentLang = 'en';
             let draggedStationId = null;
-            let isDragging = false; // Differentiates a drag from a click for swapping
+            let isDragging = false;
 
-            // --- MAIN INITIALIZATION ---
+            // --- MAIN INITIALIZATION (Corrected Logic) ---
             function init() {
-                const savedData = localStorage.getItem('integratedClassroomData');
-                if (savedData) {
-                    classroomData = JSON.parse(savedData);
-                    selectionModal.classList.add('hidden');
-                    mainApp.classList.remove('hidden');
-                    loadLayoutFromData();
-                } else {
-                    selectionModal.classList.remove('hidden');
-                }
                 addGlobalEventListeners();
+                const savedLang = localStorage.getItem('classroomLang');
+                currentLang = savedLang || 'en';
+                translateUI();
+                descriptionModal.classList.remove('hidden'); // ALWAYS show welcome message first
             }
 
+            // --- LANGUAGE & TRANSLATION ---
+            function setLanguage(lang) {
+                currentLang = lang;
+                localStorage.setItem('classroomLang', lang);
+                translateUI();
+                if (appData.layoutType) {
+                    generateLayout(appData.layoutType, false);
+                }
+            }
+
+            function translateUI() {
+                document.querySelectorAll('[data-translate]').forEach(el => {
+                    const key = el.getAttribute('data-translate');
+                    if (translations[currentLang][key]) el.innerHTML = translations[currentLang][key];
+                });
+                const changeLayoutBtnTextKey = appData.layoutType === 'parliament' ? 'changeLayoutToStandard' : 'changeLayoutToParliament';
+                document.querySelectorAll('.change-layout-btn').forEach(btn => {
+                    btn.textContent = translations[currentLang][changeLayoutBtnTextKey] || '';
+                });
+                const changeLangBtnText = translations[currentLang].changeLang;
+                globalLangBtn.textContent = changeLangBtnText;
+                welcomeLangBtn.textContent = changeLangBtnText;
+                populateStudentData();
+            }
+
+            // --- EVENT LISTENERS & INPUT HANDLING ---
             function addGlobalEventListeners() {
-                // Layout Selection
+                welcomeLangBtn.addEventListener('click', () => setLanguage(currentLang === 'en' ? 'it' : 'en'));
+                document.getElementById('start-app-btn').addEventListener('click', () => {
+                    descriptionModal.classList.add('hidden');
+                    const savedData = localStorage.getItem('classroomData');
+                    if (savedData) {
+                        appData = JSON.parse(savedData);
+                        mainApp.classList.remove('hidden');
+                        globalLangBtn.classList.remove('hidden');
+                        loadLayoutFromData();
+                    } else {
+                        selectionModal.classList.remove('hidden');
+                    }
+                });
+                globalLangBtn.addEventListener('click', () => setLanguage(currentLang === 'en' ? 'it' : 'en'));
+                document.querySelectorAll('.change-layout-btn').forEach(btn => btn.addEventListener('click', switchLayout));
                 document.getElementById('select-parliament').addEventListener('click', () => setupLayout('parliament'));
                 document.getElementById('select-standard').addEventListener('click', () => setupLayout('standard'));
-
-                // Reset Buttons
-                document.getElementById('reset-data-btn1').addEventListener('click', resetAllData);
-                document.getElementById('reset-data-btn2').addEventListener('click', resetAllData);
+                document.querySelectorAll('.clear-data-btn').forEach(btn => btn.addEventListener('click', clearStudentData));
                 
-                // Config Inputs
-                wallInputs.forEach(input => input.addEventListener('input', () => generateLayout('parliament', false)));
-                totalRowsInput.addEventListener('input', () => {
-                    updateRowInputs();
-                    generateLayout('standard', false);
+                wallInputs.forEach(input => input.addEventListener('input', () => {
+                    enforceMaxValue(input);
+                    generateLayout('parliament', false);
+                }));
+                totalRowsInput.addEventListener('change', () => {
+                    enforceMaxValue(totalRowsInput);
+                    updateRowInputs(true);
                 });
-
-                // Student Modal
                 studentModal.querySelector('.close-button').addEventListener('click', () => studentModal.classList.add('hidden'));
                 document.getElementById('student-form').addEventListener('submit', handleSaveStudent);
                 document.getElementById('remove-student-btn').addEventListener('click', handleRemoveStudent);
-            }
-            
-            // --- DATA & STATE FUNCTIONS ---
-            function saveData() {
-                // Before saving, ensure studentData only contains entries for existing desks
-                const existingDeskIds = new Set(classroomData.config.desks.map(d => d.id));
-                const filteredStudentData = {};
-                for (const studentId in classroomData.studentData) {
-                    if (existingDeskIds.has(studentId)) {
-                        filteredStudentData[studentId] = classroomData.studentData[studentId];
-                    }
-                }
-                classroomData.studentData = filteredStudentData;
-                localStorage.setItem('integratedClassroomData', JSON.stringify(classroomData));
+                changePhotoBtn.addEventListener('click', () => {
+                    photoInput.classList.remove('hidden');
+                    photoDisplay.classList.add('hidden');
+                    changePhotoBtn.classList.add('hidden');
+                });
             }
 
-            function resetAllData() {
-                if (confirm("Are you sure? This will delete all saved layouts and student information.")) {
-                    localStorage.removeItem('integratedClassroomData');
-                    window.location.reload();
-                }
+            function enforceMaxValue(input) {
+                const max = parseInt(input.getAttribute('max'));
+                if (parseInt(input.value) > max) input.value = max;
             }
             
-            // --- LAYOUT SETUP & GENERATION ---
+            // --- DATA & STATE ---
+            function saveData() {
+                const existingDeskIds = new Set((appData.config.desks || []).map(d => d.id));
+                const filteredStudentData = {};
+                if (appData.studentData) {
+                    for (const studentId in appData.studentData) {
+                        if (existingDeskIds.has(studentId)) filteredStudentData[studentId] = appData.studentData[studentId];
+                    }
+                }
+                appData.studentData = filteredStudentData;
+                localStorage.setItem('classroomData', JSON.stringify(appData));
+            }
+
+            function clearStudentData() {
+                if (confirm(translations[currentLang].clearConfirm)) {
+                    appData.studentData = {};
+                    saveData();
+                    populateStudentData();
+                }
+            }
+
+            function switchLayout() {
+                const newType = appData.layoutType === 'parliament' ? 'standard' : 'parliament';
+                setupLayout(newType);
+            }
+            
+            // --- LAYOUT GENERATION ---
             function loadLayoutFromData() {
-                if (classroomData.layoutType === 'parliament') {
+                if (appData.layoutType === 'parliament') {
                     parliamentConfigPanel.classList.remove('hidden');
-                    wallInputs[0].value = classroomData.config.wall1;
-                    wallInputs[1].value = classroomData.config.wall2;
-                    wallInputs[2].value = classroomData.config.wall3;
+                    wallInputs.forEach((input, i) => input.value = appData.config[`wall${i+1}`]);
                 } else {
                     standardConfigPanel.classList.remove('hidden');
-                    totalRowsInput.value = classroomData.config.totalRows;
-                    updateRowInputs(); // Create the input fields first
-                    // Then populate them
-                    document.querySelectorAll('.row-desk-input').forEach((input, index) => {
-                        input.value = classroomData.config.rows[index];
-                    });
+                    totalRowsInput.value = appData.config.totalRows;
+                    updateRowInputs(false);
+                    document.querySelectorAll('.row-desk-input').forEach((input, i) => input.value = appData.config.rows[i]);
                 }
-                generateLayout(classroomData.layoutType, false); // Regenerate structure and apply saved data
+                generateLayout(appData.layoutType, false);
             }
 
             function setupLayout(type) {
                 selectionModal.classList.add('hidden');
                 mainApp.classList.remove('hidden');
+                globalLangBtn.classList.remove('hidden');
                 generateLayout(type, true);
             }
 
             function generateLayout(type, isFresh) {
                 if (isFresh) {
-                    classroomData = { layoutType: type, config: {}, studentData: {} };
+                    const studentData = appData.studentData;
+                    appData = { ...appData, layoutType: type, config: {}, studentData: studentData || {} };
                 }
-                classroomData.config.desks = []; // Reset desk list
-                
-                classroomContainer.innerHTML = ''; // Clear previous layout
+                appData.config.desks = [];
+                classroomContainer.innerHTML = '';
                 let stationCounter = 0;
 
                 if (type === 'parliament') {
-                    parliamentConfigPanel.classList.remove('hidden');
-                    standardConfigPanel.classList.add('hidden');
-                    classroomContainer.id = 'classroom'; // Use Project 1's ID and grid
-                    
+                    parliamentConfigPanel.classList.remove('hidden'); standardConfigPanel.classList.add('hidden');
+                    classroomContainer.id = 'classroom';
                     const [w1, w2, w3] = wallInputs.map(input => parseInt(input.value) || 0);
-                    classroomData.config = { wall1: w1, wall2: w2, wall3: w3, desks: [] };
-
+                    if (isFresh) appData.config = { wall1: w1, wall2: w2, wall3: w3 };
                     const topWall = createWall('top-wall');
                     for (let i = 0; i < w1; i++) topWall.appendChild(createDeskPair(stationCounter++, stationCounter++));
-                    
                     const leftWall = createWall('left-wall');
                     for (let i = 0; i < w2; i++) leftWall.appendChild(createDeskPair(stationCounter++, stationCounter++));
-                    
                     const rightWall = createWall('right-wall');
                     for (let i = 0; i < w3; i++) rightWall.appendChild(createDeskPair(stationCounter++, stationCounter++));
-                    
-                    classroomContainer.append(topWall, leftWall, rightWall, createWall('center-area', '<div id="teacher-desk">Cattedra</div>'), createWall('bottom-wall'));
-
+                    classroomContainer.append(topWall, leftWall, rightWall, createWall('center-area', `<div id="teacher-desk">${translations[currentLang].teacherDesk}</div>`), createWall('bottom-wall'));
                 } else {
-                    standardConfigPanel.classList.remove('hidden');
-                    parliamentConfigPanel.classList.add('hidden');
+                    standardConfigPanel.classList.remove('hidden'); parliamentConfigPanel.classList.add('hidden');
                     classroomContainer.id = 'standard-layout-area';
-                    
+                    if(isFresh) updateRowInputs(true);
                     const rowInputs = document.querySelectorAll('.row-desk-input');
-                    classroomData.config = { totalRows: rowInputs.length, rows: [], desks: [] };
-
-                    rowInputs.forEach(input => {
+                    if (isFresh) appData.config = { totalRows: rowInputs.length, rows: [] };
+                    rowInputs.forEach((input, index) => {
                         const deskPairCount = parseInt(input.value) || 0;
-                        classroomData.config.rows.push(deskPairCount);
+                        if (isFresh) appData.config.rows[index] = deskPairCount;
                         const rowDiv = document.createElement('div');
                         rowDiv.className = 'desk-row';
-                        for (let i = 0; i < deskPairCount; i++) {
-                            rowDiv.appendChild(createDeskPair(stationCounter++, stationCounter++));
-                        }
+                        for (let i = 0; i < deskPairCount; i++) rowDiv.appendChild(createDeskPair(stationCounter++, stationCounter++));
                         classroomContainer.appendChild(rowDiv);
                     });
                 }
-
-                // After creating the structure, register all desks and attach listeners
-                classroomData.config.desks = Array.from(document.querySelectorAll('.student-station')).map(station => ({ id: station.id }));
+                appData.config.desks = Array.from(document.querySelectorAll('.student-station')).map(station => ({ id: station.id }));
                 populateStudentData();
                 attachDeskListeners();
                 saveData();
+                translateUI();
             }
 
-            function updateRowInputs() {
+            function updateRowInputs(shouldGenerate) {
                 const rowCount = parseInt(totalRowsInput.value) || 1;
                 rowInputsContainer.innerHTML = '';
                 for (let i = 1; i <= rowCount; i++) {
                     const div = document.createElement('div');
-                    div.innerHTML = `<label>Desks (Pairs) in Row ${i}:</label><input type="number" class="row-desk-input" value="4" min="0">`;
+                    div.innerHTML = `<label>${translations[currentLang].desksInRow} ${i}:</label><input type="number" class="row-desk-input" value="5" min="0" max="5">`;
                     rowInputsContainer.appendChild(div);
                 }
-                // Add listeners to new inputs
-                document.querySelectorAll('.row-desk-input').forEach(input => input.addEventListener('input', () => generateLayout('standard', false)));
+                document.querySelectorAll('.row-desk-input').forEach(input => {
+                    input.addEventListener('input', () => {
+                        enforceMaxValue(input);
+                        if(shouldGenerate) generateLayout('standard', false);
+                    });
+                });
+                if (shouldGenerate) generateLayout('standard', false);
             }
 
-            // --- Element Creation Helpers ---
-            function createWall(className, innerHTML = '') {
-                const wall = document.createElement('div');
-                wall.className = `wall ${className}`;
-                wall.innerHTML = innerHTML;
-                return wall;
-            }
-            
-            function createDeskPair(id1, id2) {
-                const pair = document.createElement('div');
-                pair.className = 'desk-pair';
-                pair.appendChild(createStudentStation(id1));
-                pair.appendChild(createStudentStation(id2));
-                return pair;
-            }
+            // --- Element Creation & Population ---
+            function createWall(className, innerHTML = '') { const wall = document.createElement('div'); wall.className = `wall ${className}`; wall.innerHTML = innerHTML; return wall; }
+            function createDeskPair(id1, id2) { const pair = document.createElement('div'); pair.className = 'desk-pair'; pair.appendChild(createStudentStation(id1)); pair.appendChild(createStudentStation(id2)); return pair; }
+            function createStudentStation(id) { const station = document.createElement('div'); station.className = 'student-station'; station.id = `station-${id}`; return station; }
 
-            function createStudentStation(id) {
-                const station = document.createElement('div');
-                station.className = 'student-station';
-                station.id = `station-${id}`;
-                return station;
-            }
-
-            // --- Data Population ---
             function populateStudentData() {
-                const studentData = classroomData.studentData || {};
+                const studentData = appData.studentData || {};
                 document.querySelectorAll('.student-station').forEach(station => {
                     const data = studentData[station.id];
-                    // Clear previous content
-                    station.innerHTML = '';
-                    station.style.backgroundImage = '';
-                    if (data && data.name) {
-                        if (data.photo) station.style.backgroundImage = `url(${data.photo})`;
-                        const nameDiv = document.createElement('div');
-                        nameDiv.className = 'student-name';
-                        nameDiv.textContent = data.name;
-                        station.appendChild(nameDiv);
+                    station.innerHTML = ''; station.style.backgroundImage = '';
+                    const nameDiv = document.createElement('div'); nameDiv.className = 'student-name';
+                    
+                    // --- MODIFIED LOGIC FOR PHOTO-FIRST IDENTIFICATION ---
+                    if (data && (data.name || data.photo)) {
+                        if (data.photo) {
+                            station.style.backgroundImage = `url(${data.photo})`;
+                        }
+                        nameDiv.textContent = data.name || translations[currentLang].emptySeat;
+                    } else {
+                        nameDiv.textContent = translations[currentLang].emptySeat;
                     }
+                    station.appendChild(nameDiv);
                 });
             }
 
-            // --- Event Listeners Attachment ---
             function attachDeskListeners() {
-                const stations = document.querySelectorAll('.student-station');
-                stations.forEach(station => {
+                document.querySelectorAll('.student-station').forEach(station => {
                     station.addEventListener('click', handleStationClick);
                     station.addEventListener('mousedown', handleDragStart);
                     station.addEventListener('mouseover', handleDragOver);
                     station.addEventListener('mouseout', handleDragOut);
-                    station.addEventListener('mouseup', handleDrop);
                 });
-
-                const teacherDesk = document.getElementById('teacher-desk');
-                if(teacherDesk) {
-                    // This is a placeholder for future interactivity as per original skeleton
-                    teacherDesk.addEventListener('click', () => { alert('Teacher Desk Clicked!'); });
-                }
+                document.addEventListener('mouseup', handleDrop);
             }
             
-            // --- Event Handlers (Student Interaction) ---
+            // --- Event Handlers ---
             function handleStationClick(e) {
-                if (isDragging) return; // Prevent modal on drag-swap
-                const station = e.currentTarget;
-                const stationId = station.id;
-                const data = classroomData.studentData[stationId] || {};
-                
+                if (isDragging) return;
+                const stationId = e.currentTarget.id;
+                const data = appData.studentData[stationId] || {};
                 document.getElementById('station-id-input').value = stationId;
                 document.getElementById('student-name').value = data.name || '';
                 document.getElementById('student-info').value = data.info || '';
-                document.getElementById('student-photo').value = ''; // Clear file input
+                photoInput.value = '';
+
+                if (data.photo) {
+                    photoDisplay.style.backgroundImage = `url(${data.photo})`;
+                    photoDisplay.classList.remove('hidden');
+                    changePhotoBtn.classList.remove('hidden');
+                    photoInput.classList.add('hidden');
+                } else {
+                    photoDisplay.classList.add('hidden');
+                    changePhotoBtn.classList.add('hidden');
+                    photoInput.classList.remove('hidden');
+                }
                 studentModal.classList.remove('hidden');
             }
 
             function handleSaveStudent(e) {
                 e.preventDefault();
                 const stationId = document.getElementById('station-id-input').value;
-                const photoFile = document.getElementById('student-photo').files[0];
+                const photoFile = photoInput.files[0];
+                const studentName = document.getElementById('student-name').value.trim();
 
                 const studentInfo = {
-                    name: document.getElementById('student-name').value.trim(),
+                    name: studentName,
                     info: document.getElementById('student-info').value.trim(),
-                    photo: (classroomData.studentData[stationId] || {}).photo // Keep old photo unless new one is uploaded
+                    photo: (appData.studentData[stationId] || {}).photo
                 };
-                
-                if (photoFile) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        studentInfo.photo = event.target.result;
-                        classroomData.studentData[stationId] = studentInfo;
-                        saveData();
-                        populateStudentData();
-                    };
-                    reader.readAsDataURL(photoFile);
+
+                // Only proceed if there's a name, a new photo, or an existing photo
+                if (studentInfo.name || photoFile || studentInfo.photo) {
+                    if (photoFile) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            studentInfo.photo = event.target.result;
+                            appData.studentData[stationId] = studentInfo;
+                            saveData(); populateStudentData();
+                        };
+                        reader.readAsDataURL(photoFile);
+                    } else {
+                        appData.studentData[stationId] = studentInfo;
+                        saveData(); populateStudentData();
+                    }
                 } else {
-                    classroomData.studentData[stationId] = studentInfo;
-                    saveData();
-                    populateStudentData();
+                    // If all fields are empty, treat it as a removal
+                    delete appData.studentData[stationId];
+                    saveData(); populateStudentData();
                 }
                 studentModal.classList.add('hidden');
-            }
+}
 
             function handleRemoveStudent() {
                 const stationId = document.getElementById('station-id-input').value;
-                delete classroomData.studentData[stationId];
-                saveData();
-                populateStudentData();
+                delete appData.studentData[stationId];
+                saveData(); populateStudentData();
                 studentModal.classList.add('hidden');
             }
 
-            // --- Drag-to-Swap Handlers (from Project 1) ---
+            // --- Drag-to-Swap Handlers ---
             function handleDragStart(e) {
-                draggedStationId = e.currentTarget.id;
-                isDragging = false; // Reset on new mousedown
-                e.preventDefault();
+                if(e.target.closest('.student-station')){
+                    draggedStationId = e.target.closest('.student-station').id; isDragging = false; e.preventDefault();
+                }
             }
-
             function handleDragOver(e) {
-                if (draggedStationId) {
-                    isDragging = true;
-                    document.body.classList.add('dragging');
-                    const targetStation = e.currentTarget;
-                    if (targetStation.id !== draggedStationId) {
-                        targetStation.classList.add('drag-over');
-                    }
+                const targetStation = e.target.closest('.student-station');
+                if (draggedStationId && targetStation) {
+                    isDragging = true; document.body.classList.add('dragging');
+                    if (targetStation.id !== draggedStationId) targetStation.classList.add('drag-over');
                 }
             }
-            
             function handleDragOut(e) {
-                e.currentTarget.classList.remove('drag-over');
+                const targetStation = e.target.closest('.student-station');
+                if(targetStation) targetStation.classList.remove('drag-over');
             }
-
             function handleDrop(e) {
-                if (isDragging && draggedStationId) {
-                    const targetStation = e.currentTarget;
-                    if (targetStation.id !== draggedStationId) {
-                        // Swap data
-                        const sourceData = classroomData.studentData[draggedStationId];
-                        const targetData = classroomData.studentData[targetStation.id];
-                        classroomData.studentData[draggedStationId] = targetData;
-                        classroomData.studentData[targetStation.id] = sourceData;
-                        saveData();
-                        populateStudentData();
-                    }
+                const targetStation = e.target.closest('.student-station');
+                if (isDragging && draggedStationId && targetStation && targetStation.id !== draggedStationId) {
+                    const sourceData = appData.studentData[draggedStationId];
+                    const targetData = appData.studentData[targetStation.id];
+                    appData.studentData[draggedStationId] = targetData;
+                    appData.studentData[targetStation.id] = sourceData;
+                    saveData(); populateStudentData();
                 }
-                // Cleanup regardless of whether it was a swap or not
                 document.body.classList.remove('dragging');
                 document.querySelectorAll('.student-station').forEach(s => s.classList.remove('drag-over'));
                 draggedStationId = null;
-                setTimeout(() => { isDragging = false; }, 50); // Timeout to prevent click event
+                setTimeout(() => { isDragging = false; }, 50);
             }
             
-            // --- Start the application ---
             init();
         });
     </script>
