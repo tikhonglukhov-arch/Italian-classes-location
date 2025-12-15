@@ -31,6 +31,14 @@
             user-select: none;
         }
 
+        /* --- Global Language Button --- */
+        #global-lang-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001; /* Above all other elements */
+        }
+
         /* --- Modals --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -45,15 +53,11 @@
         }
         #student-modal .modal-content { text-align: left; width: 400px; }
         #description-modal p { text-align: left; line-height: 1.6; }
-        
         .choice-group { display: flex; gap: 20px; margin-top: 20px; justify-content: center; }
-        .close-button {
-            position: absolute; top: 10px; right: 15px; font-size: 28px;
-            font-weight: bold; cursor: pointer; color: #aaa;
-        }
+        .close-button { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa; }
         
         /* --- Main App Structure --- */
-        .app-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1400px; margin: auto; }
+        .app-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1400px; margin: auto; padding-top: 50px; } /* Added padding for global button */
         
         /* Configuration Panels */
         .config-panel { background-color: var(--secondary-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
@@ -68,32 +72,31 @@
         /* Classroom Container & Desk Styles */
         #classroom-container-parent { background-color: var(--secondary-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; }
         #classroom { 
-            display: grid; grid-template-columns: 110px 1fr 110px; grid-template-rows: auto 1fr auto;
+            display: grid; grid-template-columns: 230px 1fr 230px; /* Increased for larger desks */ grid-template-rows: auto 1fr auto;
             width: 100%; max-width: 1200px; min-height: 70vh; margin: auto; background-color: #fffbe8;
             border: 2px solid #333; position: relative;
         }
         .wall { display: flex; justify-content: center; align-items: center; }
-        .top-wall { grid-column: 1 / 4; grid-row: 1; padding: 15px; gap: 10px; flex-wrap: wrap; }
+        .top-wall { grid-column: 1 / 4; grid-row: 1; padding: 15px; gap: 15px; flex-wrap: wrap; }
         .left-wall, .right-wall { grid-row: 2; flex-direction: column; justify-content: flex-start; gap: 15px; }
-        .left-wall { grid-column: 1; padding-top: 10px; }
-        .right-wall { grid-column: 3; padding-top: 0; }
+        .left-wall { grid-column: 1; }
+        .right-wall { grid-column: 3; }
         .bottom-wall { grid-column: 1 / 4; grid-row: 3; }
         .center-area { grid-column: 2; grid-row: 2; display: flex; justify-content: center; align-items: flex-end; }
-        #teacher-desk { width: 100px; height: 50px; background-color: #a47449; color: white; display: flex; justify-content: center; align-items: center; border-radius: 5px; border: 2px solid #6b4b2c; }
+        #teacher-desk { width: 120px; height: 60px; background-color: #a47449; color: white; display: flex; justify-content: center; align-items: center; border-radius: 5px; border: 2px solid #6b4b2c; }
         
         #standard-layout-area { display: flex; flex-direction: column; gap: 20px; align-items: center; padding: 20px; background-color: #fffbe8; min-height: 70vh; border: 2px solid #333; border-radius: 12px; }
-        .desk-row { display: flex; justify-content: center; gap: 15px; }
+        .desk-row { display: flex; justify-content: center; gap: 20px; }
         
-        .desk-pair { display: flex; gap: 4px; padding: 4px; background-color: #e0dcd1; border-radius: 5px; }
+        .desk-pair { display: flex; gap: 8px; padding: 6px; background-color: #e0dcd1; border-radius: 8px; }
         .left-wall .desk-pair, .right-wall .desk-pair { flex-direction: column; }
         
         .student-station {
-            width: 50px; height: 50px; background-color: var(--desk-bg); border: 1px solid var(--border-color); cursor: pointer;
+            width: 100px; height: 100px; /* Doubled size */ background-color: var(--desk-bg); border: 1px solid var(--border-color); cursor: pointer;
             display: flex; justify-content: center; align-items: center; text-align: center;
-            overflow: hidden; position: relative; background-size: cover; background-position: center;
-            transition: border-color 0.2s;
+            overflow: hidden; position: relative; background-size: cover; background-position: center; transition: border-color 0.2s;
         }
-        .student-name { position: absolute; bottom: 1px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.75); padding: 1px 0; font-weight: bold; font-size: 10px; }
+        .student-name { position: absolute; bottom: 4px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.8); padding: 4px 0; font-weight: 500; font-size: 14px; }
         .student-station.drag-over { border-color: var(--success-color); border-width: 2px; }
         
         .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
@@ -108,10 +111,13 @@
             .wall { flex-wrap: wrap; }
             .left-wall .desk-pair, .right-wall .desk-pair { flex-direction: row; }
             .config-header { flex-direction: column; align-items: flex-start; }
+            #global-lang-btn { top: 10px; right: 10px; }
         }
     </style>
 </head>
 <body>
+    <!-- Global Language Button -->
+    <button id="global-lang-btn" class="btn btn-secondary hidden"></button>
 
     <!-- 1. Language Selection Screen -->
     <div id="language-modal" class="modal">
@@ -127,19 +133,19 @@
     <!-- 2. Start Notice / Product Description -->
     <div id="description-modal" class="modal hidden">
         <div class="modal-content">
-            <h2 data-translate="welcomeTitle">Welcome!</h2>
-            <p data-translate="welcomeDesc">This is a tool...</p>
-            <button id="start-app-btn" class="btn btn-primary" data-translate="startBtn">Get Started</button>
+            <h2 data-translate="welcomeTitle"></h2>
+            <p data-translate="welcomeDesc"></p>
+            <button id="start-app-btn" class="btn btn-primary" data-translate="startBtn"></button>
         </div>
     </div>
 
     <!-- 3. Classroom Type Selection Screen -->
     <div id="selection-modal" class="modal hidden">
         <div class="modal-content">
-            <h2 data-translate="chooseLayout">Choose a Classroom Schema</h2>
+            <h2 data-translate="chooseLayout"></h2>
             <div class="choice-group">
-                <button id="select-parliament" class="btn btn-primary" data-translate="parliament">Parliament</button>
-                <button id="select-standard" class="btn btn-primary" data-translate="standard">Standard</button>
+                <button id="select-parliament" class="btn btn-primary" data-translate="parliament"></button>
+                <button id="select-standard" class="btn btn-primary" data-translate="standard"></button>
             </div>
         </div>
     </div>
@@ -149,30 +155,24 @@
         <!-- Configuration Panels -->
         <div class="config-panel hidden" id="parliament-config">
             <div class="config-header">
-                <h3 data-translate="parliamentConfig">Parliament Arrangement Configuration</h3>
-                <div class="config-buttons">
-                    <button class="change-layout-btn btn btn-primary" data-translate="changeLayout">Switch Layout</button>
-                    <button class="change-lang-btn btn btn-secondary"></button>
-                </div>
+                <h3 data-translate="parliamentConfig"></h3>
+                <div class="config-buttons"><button class="change-layout-btn btn btn-primary"></button></div>
             </div>
             <div class="input-group">
-                <div><label data-translate="topWall">Top Row (Pairs):</label><input type="number" id="wall1-desks" value="7" min="0"></div>
-                <div><label data-translate="leftWall">Left Row (Pairs):</label><input type="number" id="wall2-desks" value="3" min="0"></div>
-                <div><label data-translate="rightWall">Right Row (Pairs):</label><input type="number" id="wall3-desks" value="4" min="0"></div>
+                <div><label data-translate="topWall"></label><input type="number" id="wall1-desks" value="5" min="0" max="5"></div>
+                <div><label data-translate="leftWall"></label><input type="number" id="wall2-desks" value="3" min="0" max="3"></div>
+                <div><label data-translate="rightWall"></label><input type="number" id="wall3-desks" value="3" min="0" max="3"></div>
             </div>
-            <button class="clear-data-btn btn btn-danger" data-translate="clearAll">Clear Student Data</button>
+            <button class="clear-data-btn btn btn-danger" data-translate="clearData"></button>
         </div>
         <div class="config-panel hidden" id="standard-config">
             <div class="config-header">
-                <h3 data-translate="standardConfig">Standard Arrangement Configuration</h3>
-                <div class="config-buttons">
-                    <button class="change-layout-btn btn btn-primary" data-translate="changeLayout">Switch Layout</button>
-                    <button class="change-lang-btn btn btn-secondary"></button>
-                </div>
+                <h3 data-translate="standardConfig"></h3>
+                <div class="config-buttons"><button class="change-layout-btn btn btn-primary"></button></div>
             </div>
-            <div class="input-group"><label data-translate="totalRows">Total Rows:</label><input type="number" id="total-rows" value="3" min="1"></div>
+            <div class="input-group"><label data-translate="totalRows"></label><input type="number" id="total-rows" value="3" min="1" max="5"></div>
             <div id="row-inputs-container"></div>
-            <button class="clear-data-btn btn btn-danger" data-translate="clearAll">Clear Student Data</button>
+            <button class="clear-data-btn btn btn-danger" data-translate="clearData"></button>
         </div>
 
         <div id="classroom-container-parent"><div id="classroom-container"></div></div>
@@ -182,15 +182,15 @@
     <div id="student-modal" class="modal hidden">
         <div class="modal-content">
             <span class="close-button">&times;</span>
-            <h3 data-translate="studentInfo">Student Information</h3>
+            <h3 data-translate="studentInfo"></h3>
             <form id="student-form" style="display: flex; flex-direction: column; gap: 15px;">
                 <input type="hidden" id="station-id-input">
-                <div><label for="student-name" data-translate="name">Name:</label><input type="text" id="student-name"></div>
-                <div><label for="student-photo" data-translate="photo">Photo:</label><input type="file" id="student-photo" accept="image/*"></div>
-                <div><label for="student-info" data-translate="notes">Notes:</label><textarea id="student-info" rows="3"></textarea></div>
+                <div><label data-translate="name"></label><input type="text" id="student-name"></div>
+                <div><label data-translate="photo"></label><input type="file" id="student-photo" accept="image/*"></div>
+                <div><label data-translate="notes"></label><textarea id="student-info" rows="3"></textarea></div>
                 <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                    <button type="button" id="remove-student-btn" class="btn btn-danger" data-translate="removeStudent">Remove Student</button>
-                    <button type="submit" class="btn btn-primary" data-translate="save">Save</button>
+                    <button type="button" id="remove-student-btn" class="btn btn-danger" data-translate="removeStudent"></button>
+                    <button type="submit" class="btn btn-primary" data-translate="save"></button>
                 </div>
             </form>
         </div>
@@ -211,13 +211,14 @@
                     parliamentConfig: "Parliament Arrangement Configuration",
                     standardConfig: "Standard Arrangement Configuration",
                     changeLang: "Italiano",
-                    changeLayout: "Switch to Standard",
+                    changeLayoutToStandard: "Switch to Standard",
+                    changeLayoutToParliament: "Switch to Parliament",
                     topWall: "Top Row (Pairs):",
                     leftWall: "Left Row (Pairs):",
                     rightWall: "Right Row (Pairs):",
                     totalRows: "Total Rows:",
                     desksInRow: "Desks (Pairs) in Row",
-                    clearAll: "Clear Student Data",
+                    clearData: "Clear Student Data",
                     studentInfo: "Student Information",
                     name: "Name:",
                     photo: "Photo:",
@@ -238,13 +239,14 @@
                     parliamentConfig: "Configurazione Disposizione a Parlamento",
                     standardConfig: "Configurazione Disposizione Standard",
                     changeLang: "English",
-                    changeLayout: "Passa a Standard",
+                    changeLayoutToStandard: "Passa a Standard",
+                    changeLayoutToParliament: "Passa a Parlamento",
                     topWall: "Fila Superiore (Banchi):",
                     leftWall: "Fila Sinistra (Banchi):",
                     rightWall: "Fila Destra (Banchi):",
                     totalRows: "Numero di File:",
                     desksInRow: "Banchi nella Fila",
-                    clearAll: "Cancella Dati Studenti",
+                    clearData: "Cancella Dati Studenti",
                     studentInfo: "Informazioni Studente",
                     name: "Nome:",
                     photo: "Foto:",
@@ -258,6 +260,7 @@
             };
 
             // --- DOM Element References ---
+            const globalLangBtn = document.getElementById('global-lang-btn');
             const languageModal = document.getElementById('language-modal');
             const descriptionModal = document.getElementById('description-modal');
             const selectionModal = document.getElementById('selection-modal');
@@ -281,53 +284,49 @@
                 const savedLang = localStorage.getItem('classroomLang');
                 const savedData = localStorage.getItem('classroomData');
 
-                if (savedLang) {
-                    currentLang = savedLang;
+                currentLang = savedLang || 'en'; // Default to English
+
+                if (savedData) {
+                    appData = JSON.parse(savedData);
                     languageModal.classList.add('hidden');
-                    if (savedData) {
-                        appData = JSON.parse(savedData);
-                        mainApp.classList.remove('hidden');
-                        loadLayoutFromData();
-                    } else {
-                        descriptionModal.classList.remove('hidden');
-                    }
+                    descriptionModal.classList.add('hidden');
+                    selectionModal.classList.add('hidden');
+                    mainApp.classList.remove('hidden');
+                    globalLangBtn.classList.remove('hidden');
+                    loadLayoutFromData();
                 } else {
-                    languageModal.classList.remove('hidden');
+                    languageModal.classList.remove('hidden'); // Start with language choice
                 }
                 addGlobalEventListeners();
                 translateUI();
             }
 
             // --- LANGUAGE & TRANSLATION ---
-            function setLanguage(lang) {
+            function setLanguage(lang, fromButton = false) {
                 currentLang = lang;
                 localStorage.setItem('classroomLang', lang);
-                languageModal.classList.add('hidden');
                 translateUI();
-                descriptionModal.classList.remove('hidden');
+
+                if (!fromButton) { // Initial setup sequence
+                    languageModal.classList.add('hidden');
+                    descriptionModal.classList.remove('hidden');
+                } else if (appData.layoutType) { // If changing language mid-session
+                    generateLayout(appData.layoutType, false);
+                }
             }
 
             function translateUI() {
                 document.querySelectorAll('[data-translate]').forEach(el => {
                     const key = el.getAttribute('data-translate');
-                    if (translations[currentLang][key]) {
-                        el.textContent = translations[currentLang][key];
-                    }
+                    if (translations[currentLang][key]) el.textContent = translations[currentLang][key];
                 });
                 
-                // Special handling for dynamic buttons
-                const changeLayoutBtnTextKey = appData.layoutType === 'parliament' ? 'Switch to Standard' : 'Switch to Parliament';
-                const changeLayoutBtnText = {
-                    en: { 'Switch to Standard': 'Switch to Standard', 'Switch to Parliament': 'Switch to Parliament' },
-                    it: { 'Switch to Standard': 'Passa a Standard', 'Switch to Parliament': 'Passa a Parlamento' }
-                };
-
+                const changeLayoutBtnTextKey = appData.layoutType === 'parliament' ? 'changeLayoutToStandard' : 'changeLayoutToParliament';
                 document.querySelectorAll('.change-layout-btn').forEach(btn => {
-                    btn.textContent = changeLayoutBtnText[currentLang][changeLayoutBtnTextKey];
+                    btn.textContent = translations[currentLang][changeLayoutBtnTextKey];
                 });
-                document.querySelectorAll('.change-lang-btn').forEach(btn => {
-                    btn.textContent = currentLang === 'en' ? 'Italiano' : 'English';
-                });
+
+                globalLangBtn.textContent = translations[currentLang].changeLang;
                 populateStudentData();
             }
 
@@ -338,7 +337,7 @@
                     descriptionModal.classList.add('hidden');
                     if (!appData.layoutType) selectionModal.classList.remove('hidden');
                 });
-                document.querySelectorAll('.change-lang-btn').forEach(btn => btn.addEventListener('click', () => languageModal.classList.remove('hidden')));
+                globalLangBtn.addEventListener('click', () => setLanguage(currentLang === 'en' ? 'it' : 'en', true));
                 document.querySelectorAll('.change-layout-btn').forEach(btn => btn.addEventListener('click', switchLayout));
                 document.getElementById('select-parliament').addEventListener('click', () => setupLayout('parliament'));
                 document.getElementById('select-standard').addEventListener('click', () => setupLayout('standard'));
@@ -376,18 +375,16 @@
 
             function switchLayout() {
                 const newType = appData.layoutType === 'parliament' ? 'standard' : 'parliament';
-                setupLayout(newType);
+                setupLayout(newType); // This will preserve student data
             }
             
             // --- LAYOUT GENERATION ---
             function loadLayoutFromData() {
                 if (appData.layoutType === 'parliament') {
                     parliamentConfigPanel.classList.remove('hidden');
-                    standardConfigPanel.classList.add('hidden');
                     wallInputs.forEach((input, i) => input.value = appData.config[`wall${i+1}`]);
                 } else {
                     standardConfigPanel.classList.remove('hidden');
-                    parliamentConfigPanel.classList.add('hidden');
                     totalRowsInput.value = appData.config.totalRows;
                     updateRowInputs();
                     document.querySelectorAll('.row-desk-input').forEach((input, i) => input.value = appData.config.rows[i]);
@@ -398,24 +395,25 @@
             function setupLayout(type) {
                 selectionModal.classList.add('hidden');
                 mainApp.classList.remove('hidden');
+                globalLangBtn.classList.remove('hidden');
                 generateLayout(type, true);
             }
 
             function generateLayout(type, isFresh) {
                 if (isFresh) {
-                    appData = { ...appData, layoutType: type, config: {}, studentData: {} };
+                    const studentData = appData.studentData; // Preserve student data on switch
+                    appData = { ...appData, layoutType: type, config: {}, studentData: studentData };
                 }
                 appData.config.desks = [];
                 classroomContainer.innerHTML = '';
                 let stationCounter = 0;
 
                 if (type === 'parliament') {
-                    parliamentConfigPanel.classList.remove('hidden');
-                    standardConfigPanel.classList.add('hidden');
+                    parliamentConfigPanel.classList.remove('hidden'); standardConfigPanel.classList.add('hidden');
                     classroomContainer.id = 'classroom';
                     
                     const [w1, w2, w3] = wallInputs.map(input => parseInt(input.value) || 0);
-                    if (isFresh) appData.config = { wall1: w1, wall2: w2, wall3: w3, desks: [] };
+                    if (isFresh) appData.config = { wall1: w1, wall2: w2, wall3: w3 };
                     const topWall = createWall('top-wall');
                     for (let i = 0; i < w1; i++) topWall.appendChild(createDeskPair(stationCounter++, stationCounter++));
                     const leftWall = createWall('left-wall');
@@ -425,17 +423,16 @@
                     
                     classroomContainer.append(topWall, leftWall, rightWall, createWall('center-area', `<div id="teacher-desk">${translations[currentLang].teacherDesk}</div>`), createWall('bottom-wall'));
                 } else {
-                    standardConfigPanel.classList.remove('hidden');
-                    parliamentConfigPanel.classList.add('hidden');
+                    standardConfigPanel.classList.remove('hidden'); parliamentConfigPanel.classList.add('hidden');
                     classroomContainer.id = 'standard-layout-area';
                     
                     if(isFresh) updateRowInputs();
                     const rowInputs = document.querySelectorAll('.row-desk-input');
-                    if (isFresh) appData.config = { totalRows: rowInputs.length, rows: [], desks: [] };
+                    if (isFresh) appData.config = { totalRows: rowInputs.length, rows: [] };
 
-                    rowInputs.forEach(input => {
+                    rowInputs.forEach((input, index) => {
                         const deskPairCount = parseInt(input.value) || 0;
-                        if (isFresh) appData.config.rows.push(deskPairCount);
+                        if (isFresh) appData.config.rows[index] = deskPairCount;
                         const rowDiv = document.createElement('div');
                         rowDiv.className = 'desk-row';
                         for (let i = 0; i < deskPairCount; i++) rowDiv.appendChild(createDeskPair(stationCounter++, stationCounter++));
@@ -446,7 +443,7 @@
                 populateStudentData();
                 attachDeskListeners();
                 saveData();
-                translateUI(); // Ensure buttons are updated
+                translateUI();
             }
 
             function updateRowInputs() {
@@ -454,7 +451,7 @@
                 rowInputsContainer.innerHTML = '';
                 for (let i = 1; i <= rowCount; i++) {
                     const div = document.createElement('div');
-                    div.innerHTML = `<label>${translations[currentLang].desksInRow} ${i}:</label><input type="number" class="row-desk-input" value="4" min="0" max="10">`;
+                    div.innerHTML = `<label>${translations[currentLang].desksInRow} ${i}:</label><input type="number" class="row-desk-input" value="4" min="0" max="5">`;
                     rowInputsContainer.appendChild(div);
                 }
                 document.querySelectorAll('.row-desk-input').forEach(input => input.addEventListener('input', () => generateLayout('standard', false)));
@@ -469,10 +466,8 @@
                 const studentData = appData.studentData || {};
                 document.querySelectorAll('.student-station').forEach(station => {
                     const data = studentData[station.id];
-                    station.innerHTML = '';
-                    station.style.backgroundImage = '';
-                    const nameDiv = document.createElement('div');
-                    nameDiv.className = 'student-name';
+                    station.innerHTML = ''; station.style.backgroundImage = '';
+                    const nameDiv = document.createElement('div'); nameDiv.className = 'student-name';
                     if (data && data.name) {
                         if (data.photo) station.style.backgroundImage = `url(${data.photo})`;
                         nameDiv.textContent = data.name;
