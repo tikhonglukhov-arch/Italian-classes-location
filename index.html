@@ -57,7 +57,7 @@
         .close-button { position: absolute; top: 10px; right: 15px; font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa; }
         
         /* --- Main App Structure --- */
-        .app-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1400px; margin: auto; padding-top: 50px; } /* Added padding for global button */
+        .app-container { display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 1400px; margin: auto; padding-top: 50px; }
         
         /* Configuration Panels */
         .config-panel { background-color: var(--secondary-bg); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
@@ -72,31 +72,31 @@
         /* Classroom Container & Desk Styles */
         #classroom-container-parent { background-color: var(--secondary-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; }
         #classroom { 
-            display: grid; grid-template-columns: 230px 1fr 230px; /* Increased for larger desks */ grid-template-rows: auto 1fr auto;
+            display: grid; grid-template-columns: 110px 1fr 110px; grid-template-rows: auto 1fr auto;
             width: 100%; max-width: 1200px; min-height: 70vh; margin: auto; background-color: #fffbe8;
             border: 2px solid #333; position: relative;
         }
         .wall { display: flex; justify-content: center; align-items: center; }
-        .top-wall { grid-column: 1 / 4; grid-row: 1; padding: 15px; gap: 15px; flex-wrap: wrap; }
+        .top-wall { grid-column: 1 / 4; grid-row: 1; padding: 15px; gap: 10px; flex-wrap: wrap; }
         .left-wall, .right-wall { grid-row: 2; flex-direction: column; justify-content: flex-start; gap: 15px; }
-        .left-wall { grid-column: 1; }
-        .right-wall { grid-column: 3; }
+        .left-wall { grid-column: 1; padding-top: 10px; }
+        .right-wall { grid-column: 3; padding-top: 0; }
         .bottom-wall { grid-column: 1 / 4; grid-row: 3; }
         .center-area { grid-column: 2; grid-row: 2; display: flex; justify-content: center; align-items: flex-end; }
-        #teacher-desk { width: 120px; height: 60px; background-color: #a47449; color: white; display: flex; justify-content: center; align-items: center; border-radius: 5px; border: 2px solid #6b4b2c; }
+        #teacher-desk { width: 100px; height: 50px; background-color: #a47449; color: white; display: flex; justify-content: center; align-items: center; border-radius: 5px; border: 2px solid #6b4b2c; }
         
         #standard-layout-area { display: flex; flex-direction: column; gap: 20px; align-items: center; padding: 20px; background-color: #fffbe8; min-height: 70vh; border: 2px solid #333; border-radius: 12px; }
-        .desk-row { display: flex; justify-content: center; gap: 20px; }
+        .desk-row { display: flex; justify-content: center; gap: 15px; }
         
-        .desk-pair { display: flex; gap: 8px; padding: 6px; background-color: #e0dcd1; border-radius: 8px; }
+        .desk-pair { display: flex; gap: 4px; padding: 4px; background-color: #e0dcd1; border-radius: 5px; }
         .left-wall .desk-pair, .right-wall .desk-pair { flex-direction: column; }
         
         .student-station {
-            width: 100px; height: 100px; /* Doubled size */ background-color: var(--desk-bg); border: 1px solid var(--border-color); cursor: pointer;
+            width: 50px; height: 50px; /* Original size */ background-color: var(--desk-bg); border: 1px solid var(--border-color); cursor: pointer;
             display: flex; justify-content: center; align-items: center; text-align: center;
             overflow: hidden; position: relative; background-size: cover; background-position: center; transition: border-color 0.2s;
         }
-        .student-name { position: absolute; bottom: 4px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.8); padding: 4px 0; font-weight: 500; font-size: 14px; }
+        .student-name { position: absolute; bottom: 1px; left: 0; right: 0; background-color: rgba(255, 255, 255, 0.75); padding: 1px 0; font-weight: bold; font-size: 10px; }
         .student-station.drag-over { border-color: var(--success-color); border-width: 2px; }
         
         .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 14px; }
@@ -119,27 +119,19 @@
     <!-- Global Language Button -->
     <button id="global-lang-btn" class="btn btn-secondary hidden"></button>
 
-    <!-- 1. Language Selection Screen -->
-    <div id="language-modal" class="modal">
+    <!-- 1. Start Notice / Welcome Message -->
+    <div id="description-modal" class="modal">
         <div class="modal-content">
-            <h2>Choose Language / Scegli la Lingua</h2>
+            <h2 data-translate="welcomeTitle"></h2>
+            <p data-translate="welcomeDesc"></p>
             <div class="choice-group">
-                <button id="select-lang-en" class="btn btn-primary">English</button>
-                <button id="select-lang-it" class="btn btn-primary">Italiano</button>
+                <button id="welcome-lang-btn" class="btn btn-secondary"></button>
+                <button id="start-app-btn" class="btn btn-primary" data-translate="startBtn"></button>
             </div>
         </div>
     </div>
 
-    <!-- 2. Start Notice / Product Description -->
-    <div id="description-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 data-translate="welcomeTitle"></h2>
-            <p data-translate="welcomeDesc"></p>
-            <button id="start-app-btn" class="btn btn-primary" data-translate="startBtn"></button>
-        </div>
-    </div>
-
-    <!-- 3. Classroom Type Selection Screen -->
+    <!-- 2. Classroom Type Selection Screen -->
     <div id="selection-modal" class="modal hidden">
         <div class="modal-content">
             <h2 data-translate="chooseLayout"></h2>
@@ -152,16 +144,15 @@
 
     <!-- Main App Container -->
     <main class="app-container hidden" id="main-app">
-        <!-- Configuration Panels -->
         <div class="config-panel hidden" id="parliament-config">
             <div class="config-header">
                 <h3 data-translate="parliamentConfig"></h3>
                 <div class="config-buttons"><button class="change-layout-btn btn btn-primary"></button></div>
             </div>
             <div class="input-group">
-                <div><label data-translate="topWall"></label><input type="number" id="wall1-desks" value="5" min="0" max="5"></div>
-                <div><label data-translate="leftWall"></label><input type="number" id="wall2-desks" value="3" min="0" max="3"></div>
-                <div><label data-translate="rightWall"></label><input type="number" id="wall3-desks" value="3" min="0" max="3"></div>
+                <div><label data-translate="topWall"></label><input type="number" id="wall1-desks" value="7" min="0" max="7"></div>
+                <div><label data-translate="leftWall"></label><input type="number" id="wall2-desks" value="3" min="0" max="4"></div>
+                <div><label data-translate="rightWall"></label><input type="number" id="wall3-desks" value="4" min="0" max="4"></div>
             </div>
             <button class="clear-data-btn btn btn-danger" data-translate="clearData"></button>
         </div>
@@ -261,7 +252,7 @@
 
             // --- DOM Element References ---
             const globalLangBtn = document.getElementById('global-lang-btn');
-            const languageModal = document.getElementById('language-modal');
+            const welcomeLangBtn = document.getElementById('welcome-lang-btn');
             const descriptionModal = document.getElementById('description-modal');
             const selectionModal = document.getElementById('selection-modal');
             const mainApp = document.getElementById('main-app');
@@ -284,33 +275,29 @@
                 const savedLang = localStorage.getItem('classroomLang');
                 const savedData = localStorage.getItem('classroomData');
 
-                currentLang = savedLang || 'en'; // Default to English
+                currentLang = savedLang || 'en';
 
                 if (savedData) {
                     appData = JSON.parse(savedData);
-                    languageModal.classList.add('hidden');
                     descriptionModal.classList.add('hidden');
                     selectionModal.classList.add('hidden');
                     mainApp.classList.remove('hidden');
                     globalLangBtn.classList.remove('hidden');
                     loadLayoutFromData();
                 } else {
-                    languageModal.classList.remove('hidden'); // Start with language choice
+                    descriptionModal.classList.remove('hidden'); // Start with welcome message
                 }
                 addGlobalEventListeners();
                 translateUI();
             }
 
             // --- LANGUAGE & TRANSLATION ---
-            function setLanguage(lang, fromButton = false) {
+            function setLanguage(lang) {
                 currentLang = lang;
                 localStorage.setItem('classroomLang', lang);
                 translateUI();
 
-                if (!fromButton) { // Initial setup sequence
-                    languageModal.classList.add('hidden');
-                    descriptionModal.classList.remove('hidden');
-                } else if (appData.layoutType) { // If changing language mid-session
+                if (appData.layoutType) { // If changing language mid-session
                     generateLayout(appData.layoutType, false);
                 }
             }
@@ -323,21 +310,23 @@
                 
                 const changeLayoutBtnTextKey = appData.layoutType === 'parliament' ? 'changeLayoutToStandard' : 'changeLayoutToParliament';
                 document.querySelectorAll('.change-layout-btn').forEach(btn => {
-                    btn.textContent = translations[currentLang][changeLayoutBtnTextKey];
+                    btn.textContent = translations[currentLang][changeLayoutBtnTextKey] || '';
                 });
 
-                globalLangBtn.textContent = translations[currentLang].changeLang;
+                const changeLangBtnText = translations[currentLang].changeLang;
+                globalLangBtn.textContent = changeLangBtnText;
+                welcomeLangBtn.textContent = changeLangBtnText;
+                
                 populateStudentData();
             }
 
             function addGlobalEventListeners() {
-                document.getElementById('select-lang-en').addEventListener('click', () => setLanguage('en'));
-                document.getElementById('select-lang-it').addEventListener('click', () => setLanguage('it'));
+                welcomeLangBtn.addEventListener('click', () => setLanguage(currentLang === 'en' ? 'it' : 'en'));
                 document.getElementById('start-app-btn').addEventListener('click', () => {
                     descriptionModal.classList.add('hidden');
                     if (!appData.layoutType) selectionModal.classList.remove('hidden');
                 });
-                globalLangBtn.addEventListener('click', () => setLanguage(currentLang === 'en' ? 'it' : 'en', true));
+                globalLangBtn.addEventListener('click', () => setLanguage(currentLang === 'en' ? 'it' : 'en'));
                 document.querySelectorAll('.change-layout-btn').forEach(btn => btn.addEventListener('click', switchLayout));
                 document.getElementById('select-parliament').addEventListener('click', () => setupLayout('parliament'));
                 document.getElementById('select-standard').addEventListener('click', () => setupLayout('standard'));
@@ -375,7 +364,7 @@
 
             function switchLayout() {
                 const newType = appData.layoutType === 'parliament' ? 'standard' : 'parliament';
-                setupLayout(newType); // This will preserve student data
+                setupLayout(newType);
             }
             
             // --- LAYOUT GENERATION ---
@@ -401,8 +390,8 @@
 
             function generateLayout(type, isFresh) {
                 if (isFresh) {
-                    const studentData = appData.studentData; // Preserve student data on switch
-                    appData = { ...appData, layoutType: type, config: {}, studentData: studentData };
+                    const studentData = appData.studentData;
+                    appData = { ...appData, layoutType: type, config: {}, studentData: studentData || {} };
                 }
                 appData.config.desks = [];
                 classroomContainer.innerHTML = '';
@@ -411,7 +400,6 @@
                 if (type === 'parliament') {
                     parliamentConfigPanel.classList.remove('hidden'); standardConfigPanel.classList.add('hidden');
                     classroomContainer.id = 'classroom';
-                    
                     const [w1, w2, w3] = wallInputs.map(input => parseInt(input.value) || 0);
                     if (isFresh) appData.config = { wall1: w1, wall2: w2, wall3: w3 };
                     const topWall = createWall('top-wall');
@@ -420,16 +408,13 @@
                     for (let i = 0; i < w2; i++) leftWall.appendChild(createDeskPair(stationCounter++, stationCounter++));
                     const rightWall = createWall('right-wall');
                     for (let i = 0; i < w3; i++) rightWall.appendChild(createDeskPair(stationCounter++, stationCounter++));
-                    
                     classroomContainer.append(topWall, leftWall, rightWall, createWall('center-area', `<div id="teacher-desk">${translations[currentLang].teacherDesk}</div>`), createWall('bottom-wall'));
                 } else {
                     standardConfigPanel.classList.remove('hidden'); parliamentConfigPanel.classList.add('hidden');
                     classroomContainer.id = 'standard-layout-area';
-                    
                     if(isFresh) updateRowInputs();
                     const rowInputs = document.querySelectorAll('.row-desk-input');
                     if (isFresh) appData.config = { totalRows: rowInputs.length, rows: [] };
-
                     rowInputs.forEach((input, index) => {
                         const deskPairCount = parseInt(input.value) || 0;
                         if (isFresh) appData.config.rows[index] = deskPairCount;
@@ -451,7 +436,7 @@
                 rowInputsContainer.innerHTML = '';
                 for (let i = 1; i <= rowCount; i++) {
                     const div = document.createElement('div');
-                    div.innerHTML = `<label>${translations[currentLang].desksInRow} ${i}:</label><input type="number" class="row-desk-input" value="4" min="0" max="5">`;
+                    div.innerHTML = `<label>${translations[currentLang].desksInRow} ${i}:</label><input type="number" class="row-desk-input" value="5" min="0" max="5">`;
                     rowInputsContainer.appendChild(div);
                 }
                 document.querySelectorAll('.row-desk-input').forEach(input => input.addEventListener('input', () => generateLayout('standard', false)));
